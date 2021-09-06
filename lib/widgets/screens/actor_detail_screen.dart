@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:movies_app/assets/colors/colors.dart';
 import 'package:movies_app/widgets/category_data.dart';
 import 'package:movies_app/widgets/category_name.dart';
 
@@ -32,7 +33,7 @@ class _ActorDetailScreenState extends State<ActorDetailScreen> {
           },
         ),
       ),
-      backgroundColor: Color(0xFF101820),
+      backgroundColor: blackBackground,
       body: Center(
           child: ListView(
         padding: EdgeInsets.fromLTRB(20, 20, 20, 20),
@@ -43,13 +44,13 @@ class _ActorDetailScreenState extends State<ActorDetailScreen> {
               Container(
                   padding: EdgeInsets.fromLTRB(20, 20, 20, 20),
                   decoration: BoxDecoration(
-                      border: Border.all(width: 3, color: Color(0xFFFEE715)),
+                      border: Border.all(width: 3, color: yellowDetail),
                       borderRadius: BorderRadius.only(
                           topLeft: Radius.circular(25.0),
                           bottomRight: Radius.circular(25.0))),
                   child: Text(
                     widget.actorDetails["name"] ?? "",
-                    style: TextStyle(color: Color(0xFFFEE715), fontSize: 30),
+                    style: TextStyle(color: yellowDetail, fontSize: 30),
                   )),
               CategoryNameWidget(categoryName: "DATE OF BIRTH:"),
               CategoryDataWidget(
@@ -66,7 +67,7 @@ class _ActorDetailScreenState extends State<ActorDetailScreen> {
                   padding: EdgeInsets.fromLTRB(10, 20, 10, 20),
                   child: Text(
                     widget.actorDetails["top_movies"] ?? "unknown",
-                    style: TextStyle(color: Color(0xFFFEE715), fontSize: 20),
+                    style: TextStyle(color: yellowDetail, fontSize: 20),
                   )),
             ],
           )

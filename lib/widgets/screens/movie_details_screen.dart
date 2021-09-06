@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:movies_app/assets/colors/colors.dart';
 import 'package:movies_app/widgets/category_data.dart';
 import 'package:movies_app/widgets/category_name.dart';
 import 'actor_detail_screen.dart';
@@ -122,7 +123,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
           },
         ),
       ),
-      backgroundColor: Color(0xFF101820),
+      backgroundColor: blackBackground,
       body: Center(
           child: ListView(
         padding: EdgeInsets.fromLTRB(20, 20, 20, 20),
@@ -133,20 +134,21 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
               Container(
                   padding: EdgeInsets.fromLTRB(20, 20, 20, 20),
                   decoration: BoxDecoration(
-                      border: Border.all(width: 3, color: Color(0xFFFEE715)),
+                      border: Border.all(width: 3, color: yellowDetail),
                       borderRadius: BorderRadius.only(
                           topLeft: Radius.circular(25.0),
                           bottomRight: Radius.circular(25.0))),
                   child: Text(
                     widget.movieDetails["title"] ?? "",
-                    style: TextStyle(color: Color(0xFFFEE715), fontSize: 30),
+                    style: TextStyle(color: yellowDetail, fontSize: 30),
                   )),
               CategoryNameWidget(categoryName: "RATE THIS MOVIE:"),
               this.isRated
                   ? Container(
                       child: Text(
                         "YOU RATED MOVIE WITH " + this.selectedRating,
-                        style: TextStyle(color: Colors.green, fontSize: 18),
+                        style:
+                            TextStyle(color: ratedMessageGreen, fontSize: 18),
                       ),
                       padding: EdgeInsets.fromLTRB(20, 20, 20, 20),
                     )
@@ -154,12 +156,12 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                       hint: Text(
                         "Rating:",
                         style: TextStyle(
-                          color: Color(0xFFFEE715),
+                          color: yellowDetail,
                         ),
                       ),
                       value: this.selectedRating,
-                      dropdownColor: Color(0xFF101820),
-                      style: TextStyle(color: Color(0xFFFEE715), fontSize: 20),
+                      dropdownColor: blackBackground,
+                      style: TextStyle(color: yellowDetail, fontSize: 20),
                       items: <String>[
                         '0.5',
                         '1.0',
@@ -199,23 +201,23 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                   ? TextButton(
                       style: ButtonStyle(
                           backgroundColor:
-                              MaterialStateProperty.all(Colors.red)),
+                              MaterialStateProperty.all(deleteRatingRed)),
                       onPressed: () => deleteMovieRating(
                           context, widget.movieDetails["id"].toString()),
                       child: Text("DELETE",
                           style: TextStyle(
-                            color: Color(0xFF101820),
+                            color: blackBackground,
                             fontSize: 20,
                           )))
                   : TextButton(
                       style: ButtonStyle(
                           backgroundColor:
-                              MaterialStateProperty.all(Color(0xFFFEE715))),
+                              MaterialStateProperty.all(yellowDetail)),
                       onPressed: () => rateMovie(
                           context, widget.movieDetails["id"].toString()),
                       child: Text("RATE",
                           style: TextStyle(
-                            color: Color(0xFF101820),
+                            color: blackBackground,
                             fontSize: 20,
                           ))),
               CategoryNameWidget(categoryName: "GENRES:"),
@@ -251,8 +253,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                                 navigateToActorDetailScreen(context, item),
                             child: Text(
                               widget.topActors[item] ?? "X",
-                              style:
-                                  TextStyle(color: Colors.blue, fontSize: 20),
+                              style: TextStyle(color: linkBlue, fontSize: 20),
                             ),
                           )))
                       .toList()),
@@ -261,8 +262,9 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                   children: widget.reviews.values
                       .map((item) => new Container(
                           decoration: BoxDecoration(
-                            color: Colors.yellow,
-                            border: Border.all(width: 3, color: Colors.black),
+                            color: yellowDetail,
+                            border:
+                                Border.all(width: 3, color: blackBackground),
                           ),
                           padding: EdgeInsets.fromLTRB(20, 20, 20, 10),
                           child: Column(children: [
@@ -282,7 +284,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                             Text(
                               item["review_text"] ?? "",
                               style: TextStyle(
-                                  color: Color(0xFF101820), fontSize: 16),
+                                  color: blackBackground, fontSize: 16),
                             ),
                           ])))
                       .toList()),

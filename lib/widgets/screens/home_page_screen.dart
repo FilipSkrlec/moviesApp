@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:movies_app/assets/colors/colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'actor_search_screen.dart';
 import 'movie_details_screen.dart';
@@ -205,15 +206,15 @@ class _HomePageScreenState extends State<HomePageScreen> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      backgroundColor: Color(0xFF101820),
+      backgroundColor: blackBackground,
       body: Center(
           child: ListView(
         children: <Widget>[
           TextField(
               controller: this.movieSearchInputController,
-              style: TextStyle(color: Color(0xFFFEE715)),
+              style: TextStyle(color: yellowDetail),
               decoration: InputDecoration(
-                labelStyle: TextStyle(color: Color(0xFFFEE715)),
+                labelStyle: TextStyle(color: yellowDetail),
                 labelText: "Find movie:",
                 suffixIcon: IconButton(
                     icon: Icon(Icons.search_rounded),
@@ -222,9 +223,9 @@ class _HomePageScreenState extends State<HomePageScreen> {
               )),
           TextField(
               controller: this.actorSearchInputController,
-              style: TextStyle(color: Color(0xFFFEE715)),
+              style: TextStyle(color: yellowDetail),
               decoration: InputDecoration(
-                labelStyle: TextStyle(color: Color(0xFFFEE715)),
+                labelStyle: TextStyle(color: yellowDetail),
                 labelText: "Find actor:",
                 suffixIcon: IconButton(
                     icon: Icon(Icons.search_sharp),
@@ -244,7 +245,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
                                     const EdgeInsets.fromLTRB(20, 20, 20, 20),
                                 decoration: BoxDecoration(
                                     border: Border.all(
-                                        width: 3, color: Color(0xFFFEE715)),
+                                        width: 3, color: yellowDetail),
                                     borderRadius: BorderRadius.only(
                                         topLeft: Radius.circular(25.0),
                                         bottomRight: Radius.circular(25.0))),
@@ -257,7 +258,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
                                         this.movieTitlesIds[item] ?? "X",
                                         style: TextStyle(
                                             fontSize: 21,
-                                            color: Color(0xFFFEE715)))),
+                                            color: yellowDetail))),
                               ))
                           .toList())
                   : Text("Nema podataka")
@@ -266,7 +267,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
         ],
       )),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Color(0xFFFEE715),
+        backgroundColor: yellowDetail,
         onPressed: getMoviesData,
         tooltip: 'Get more movies',
         child: Icon(Icons.add),

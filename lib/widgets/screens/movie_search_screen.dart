@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:movies_app/assets/colors/colors.dart';
 import 'movie_details_screen.dart';
 
 class MovieSearchScreen extends StatefulWidget {
@@ -135,7 +136,7 @@ class _MovieSearchScreenState extends State<MovieSearchScreen> {
           },
         ),
       ),
-      backgroundColor: Color(0xFF101820),
+      backgroundColor: blackBackground,
       body: Center(
           child: ListView(
         children: <Widget>[
@@ -160,7 +161,7 @@ class _MovieSearchScreenState extends State<MovieSearchScreen> {
         ],
       )),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Color(0xFFFEE715),
+        backgroundColor: yellowDetail,
         onPressed: getNextMoviePage,
         tooltip: 'Get more movies',
         child: Icon(Icons.add),
