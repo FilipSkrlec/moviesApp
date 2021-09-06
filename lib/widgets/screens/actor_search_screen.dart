@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:movies_app/assets/colors/colors.dart';
+import 'package:movies_app/assets/texts/texts.dart';
 import 'actor_detail_screen.dart';
 
 class ActorSearchScreen extends StatefulWidget {
@@ -54,7 +55,7 @@ class _ActorSearchScreenState extends State<ActorSearchScreen> {
 
     Navigator.of(context).push(MaterialPageRoute(
         builder: (context) => ActorDetailScreen(
-              title: 'Flutter Movie App',
+              title: appTitle,
               actorDetails: actorDataMap,
               apiKey: widget.apiKey,
             )));

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:movies_app/assets/colors/colors.dart';
+import 'package:movies_app/assets/texts/texts.dart';
 import 'package:movies_app/widgets/category_data.dart';
 import 'package:movies_app/widgets/category_name.dart';
 import 'actor_detail_screen.dart';
@@ -61,7 +62,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
 
     Navigator.of(context).push(MaterialPageRoute(
         builder: (context) => ActorDetailScreen(
-              title: 'Flutter Movie App',
+              title: appTitle,
               actorDetails: actorDataMap,
               apiKey: widget.apiKey,
             )));
@@ -142,11 +143,11 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                     widget.movieDetails["title"] ?? "",
                     style: TextStyle(color: yellowDetail, fontSize: 30),
                   )),
-              CategoryNameWidget(categoryName: "RATE THIS MOVIE:"),
+              CategoryNameWidget(categoryName: categoryMovieLabels["rating"]!),
               this.isRated
                   ? Container(
                       child: Text(
-                        "YOU RATED MOVIE WITH " + this.selectedRating,
+                        ratedMovieText + this.selectedRating,
                         style:
                             TextStyle(color: ratedMessageGreen, fontSize: 18),
                       ),
@@ -154,7 +155,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                     )
                   : DropdownButton<String>(
                       hint: Text(
-                        "Rating:",
+                        ratingDropdownButtonText,
                         style: TextStyle(
                           color: yellowDetail,
                         ),
@@ -162,28 +163,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                       value: this.selectedRating,
                       dropdownColor: blackBackground,
                       style: TextStyle(color: yellowDetail, fontSize: 20),
-                      items: <String>[
-                        '0.5',
-                        '1.0',
-                        '1.5',
-                        '2.0',
-                        '2.5',
-                        '3.0',
-                        '3.5',
-                        '4.0',
-                        '4.5',
-                        '5.0',
-                        '5.5',
-                        '6.0',
-                        '6.5',
-                        '7.0',
-                        '7.5',
-                        '8.0',
-                        '8.5',
-                        '9.0',
-                        '9.5',
-                        '10.0'
-                      ].map((String value) {
+                      items: possibleMovieRatings.map((String value) {
                         return DropdownMenuItem<String>(
                           value: value,
                           child: new Text(
@@ -204,7 +184,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                               MaterialStateProperty.all(deleteRatingRed)),
                       onPressed: () => deleteMovieRating(
                           context, widget.movieDetails["id"].toString()),
-                      child: Text("DELETE",
+                      child: Text(deleteMovieButtonText,
                           style: TextStyle(
                             color: blackBackground,
                             fontSize: 20,
@@ -215,35 +195,44 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                               MaterialStateProperty.all(yellowDetail)),
                       onPressed: () => rateMovie(
                           context, widget.movieDetails["id"].toString()),
-                      child: Text("RATE",
+                      child: Text(rateMovieButtonText,
                           style: TextStyle(
                             color: blackBackground,
                             fontSize: 20,
                           ))),
-              CategoryNameWidget(categoryName: "GENRES:"),
-              CategoryDataWidget(
-                  categoryData: widget.movieDetails["genres"] ?? "unknown"),
-              CategoryNameWidget(categoryName: "RELEASE DATE:"),
+              CategoryNameWidget(categoryName: categoryMovieLabels["genres"]!),
               CategoryDataWidget(
                   categoryData:
-                      widget.movieDetails["release_date"] ?? "unknown"),
-              CategoryNameWidget(categoryName: "PRODUCTION COMPANIES:"),
+                      widget.movieDetails["genres"] ?? unknownDataText),
+              CategoryNameWidget(
+                  categoryName: categoryMovieLabels["release_date"]!),
               CategoryDataWidget(
                   categoryData:
-                      widget.movieDetails["production_companies"] ?? "unknown"),
-              CategoryNameWidget(categoryName: "RUNTIME:"),
+                      widget.movieDetails["release_date"] ?? unknownDataText),
+              CategoryNameWidget(
+                  categoryName: categoryMovieLabels["production_companies"]!),
+              CategoryDataWidget(
+                  categoryData: widget.movieDetails["production_companies"] ??
+                      unknownDataText),
+              CategoryNameWidget(categoryName: categoryMovieLabels["runtime"]!),
               CategoryDataWidget(
                   categoryData: widget.movieDetails["runtime"]! + " minutes"),
-              CategoryNameWidget(categoryName: "VOTE AVERAGE:"),
+              CategoryNameWidget(
+                  categoryName: categoryMovieLabels["vote_average"]!),
               CategoryDataWidget(
-                  categoryData: widget.movieDetails["vote_average"] ?? "-"),
-              CategoryNameWidget(categoryName: "VOTE COUNT:"),
+                  categoryData:
+                      widget.movieDetails["vote_average"] ?? noDataText),
+              CategoryNameWidget(
+                  categoryName: categoryMovieLabels["vote_count"]!),
               CategoryDataWidget(
-                  categoryData: widget.movieDetails["vote_count"] ?? "-"),
-              CategoryNameWidget(categoryName: "OVERVIEW:"),
+                  categoryData:
+                      widget.movieDetails["vote_count"] ?? noDataText),
+              CategoryNameWidget(
+                  categoryName: categoryMovieLabels["overview"]!),
               CategoryDataWidget(
-                  categoryData: widget.movieDetails["overview"] ?? "-"),
-              CategoryNameWidget(categoryName: "MAIN ACTORS:"),
+                  categoryData: widget.movieDetails["overview"] ?? noDataText),
+              CategoryNameWidget(
+                  categoryName: categoryMovieLabels["main_actors"]!),
               Column(
                   children: widget.topActors.keys
                       .map((item) => new Container(
@@ -252,12 +241,12 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                             onPressed: () =>
                                 navigateToActorDetailScreen(context, item),
                             child: Text(
-                              widget.topActors[item] ?? "X",
+                              widget.topActors[item] ?? noDataText,
                               style: TextStyle(color: linkBlue, fontSize: 20),
                             ),
                           )))
                       .toList()),
-              CategoryNameWidget(categoryName: "REVIEWS:"),
+              CategoryNameWidget(categoryName: categoryMovieLabels["reviews"]!),
               Column(
                   children: widget.reviews.values
                       .map((item) => new Container(
@@ -275,14 +264,14 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                                     fontSize: 16, fontWeight: FontWeight.bold),
                               ),
                               Text(
-                                item["reviewer_rating"] ?? "0.0",
+                                item["reviewer_rating"] ?? noDataText,
                                 style: TextStyle(
                                     fontSize: 14, fontWeight: FontWeight.bold),
                               ),
                               Icon(Icons.star_border_outlined)
                             ]),
                             Text(
-                              item["review_text"] ?? "",
+                              item["review_text"] ?? noDataText,
                               style: TextStyle(
                                   color: blackBackground, fontSize: 16),
                             ),

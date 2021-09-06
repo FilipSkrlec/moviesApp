@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:movies_app/assets/colors/colors.dart';
+import 'package:movies_app/assets/texts/texts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'actor_search_screen.dart';
 import 'movie_details_screen.dart';
@@ -135,7 +136,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
 
     Navigator.of(context).push(MaterialPageRoute(
         builder: (context) => MovieDetailsScreen(
-              title: 'Flutter Movie App',
+              title: appTitle,
               movieDetails: movieDataMap,
               topActors: topActorsIds,
               reviews: reviews,
@@ -156,7 +157,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
 
     Navigator.of(context).push(MaterialPageRoute(
         builder: (context) => MovieSearchScreen(
-              title: 'Flutter Movie App',
+              title: appTitle,
               movieSearchData: jsonMovieSearchData,
               query: query,
               guestSessionId: this.guestSessionId,
@@ -176,7 +177,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
 
     Navigator.of(context).push(MaterialPageRoute(
         builder: (context) => ActorSearchScreen(
-              title: 'Flutter Movie App',
+              title: appTitle,
               actorSearchData: jsonActorSearchData,
               query: query,
               apiKey: widget.apiKey,
@@ -215,7 +216,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
               style: TextStyle(color: yellowDetail),
               decoration: InputDecoration(
                 labelStyle: TextStyle(color: yellowDetail),
-                labelText: "Find movie:",
+                labelText: searchMovieBarText,
                 suffixIcon: IconButton(
                     icon: Icon(Icons.search_rounded),
                     onPressed: () => navigateToMovieSearchScreen(
@@ -226,7 +227,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
               style: TextStyle(color: yellowDetail),
               decoration: InputDecoration(
                 labelStyle: TextStyle(color: yellowDetail),
-                labelText: "Find actor:",
+                labelText: searchActorBarText,
                 suffixIcon: IconButton(
                     icon: Icon(Icons.search_sharp),
                     onPressed: () => navigateToActorSearchScreen(
@@ -255,7 +256,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
                                         navigateToMovieDetailsScreen(
                                             context, item),
                                     child: Text(
-                                        this.movieTitlesIds[item] ?? "X",
+                                        this.movieTitlesIds[item] ?? noDataText,
                                         style: TextStyle(
                                             fontSize: 21,
                                             color: yellowDetail))),

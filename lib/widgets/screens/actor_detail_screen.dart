@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:movies_app/assets/colors/colors.dart';
+import 'package:movies_app/assets/texts/texts.dart';
 import 'package:movies_app/widgets/category_data.dart';
 import 'package:movies_app/widgets/category_name.dart';
 
@@ -52,21 +53,27 @@ class _ActorDetailScreenState extends State<ActorDetailScreen> {
                     widget.actorDetails["name"] ?? "",
                     style: TextStyle(color: yellowDetail, fontSize: 30),
                   )),
-              CategoryNameWidget(categoryName: "DATE OF BIRTH:"),
-              CategoryDataWidget(
-                  categoryData: widget.actorDetails["birthday"] ?? "unknown"),
-              CategoryNameWidget(categoryName: "PLACE OF BIRTH:"),
+              CategoryNameWidget(
+                  categoryName: categoryActorLabels["birthday"]!),
               CategoryDataWidget(
                   categoryData:
-                      widget.actorDetails["place_of_birth"] ?? "unknown"),
-              CategoryNameWidget(categoryName: "BIOGRAPHY:"),
+                      widget.actorDetails["birthday"] ?? unknownDataText),
+              CategoryNameWidget(
+                  categoryName: categoryActorLabels["place_of_birth"]!),
               CategoryDataWidget(
-                  categoryData: widget.actorDetails["biography"] ?? "unknown"),
-              CategoryNameWidget(categoryName: "TOP MOVIES:"),
+                  categoryData:
+                      widget.actorDetails["place_of_birth"] ?? unknownDataText),
+              CategoryNameWidget(
+                  categoryName: categoryActorLabels["biography"]!),
+              CategoryDataWidget(
+                  categoryData:
+                      widget.actorDetails["biography"] ?? unknownDataText),
+              CategoryNameWidget(
+                  categoryName: categoryActorLabels["top_movies"]!),
               Container(
                   padding: EdgeInsets.fromLTRB(10, 20, 10, 20),
                   child: Text(
-                    widget.actorDetails["top_movies"] ?? "unknown",
+                    widget.actorDetails["top_movies"] ?? unknownDataText,
                     style: TextStyle(color: yellowDetail, fontSize: 20),
                   )),
             ],
