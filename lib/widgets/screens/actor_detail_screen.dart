@@ -3,11 +3,15 @@ import 'package:movies_app/widgets/category_data.dart';
 import 'package:movies_app/widgets/category_name.dart';
 
 class ActorDetailScreen extends StatefulWidget {
+  final String title;
   final Map<String, String> actorDetails;
   final String apiKey;
 
   const ActorDetailScreen(
-      {Key? key, required this.actorDetails, required this.apiKey})
+      {Key? key,
+      required this.title,
+      required this.actorDetails,
+      required this.apiKey})
       : super(key: key);
 
   @override
@@ -18,6 +22,16 @@ class _ActorDetailScreenState extends State<ActorDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.title),
+        automaticallyImplyLeading: false,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context, true);
+          },
+        ),
+      ),
       backgroundColor: Color(0xFF101820),
       body: Center(
           child: ListView(

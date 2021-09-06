@@ -134,6 +134,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
 
     Navigator.of(context).push(MaterialPageRoute(
         builder: (context) => MovieDetailsScreen(
+              title: 'Flutter Movie App',
               movieDetails: movieDataMap,
               topActors: topActorsIds,
               reviews: reviews,
@@ -154,6 +155,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
 
     Navigator.of(context).push(MaterialPageRoute(
         builder: (context) => MovieSearchScreen(
+              title: 'Flutter Movie App',
               movieSearchData: jsonMovieSearchData,
               query: query,
               guestSessionId: this.guestSessionId,
@@ -173,6 +175,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
 
     Navigator.of(context).push(MaterialPageRoute(
         builder: (context) => ActorSearchScreen(
+              title: 'Flutter Movie App',
               actorSearchData: jsonActorSearchData,
               query: query,
               apiKey: widget.apiKey,

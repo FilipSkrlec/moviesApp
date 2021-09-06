@@ -4,12 +4,14 @@ import 'package:http/http.dart' as http;
 import 'actor_detail_screen.dart';
 
 class ActorSearchScreen extends StatefulWidget {
+  final String title;
   final List<dynamic> actorSearchData;
   final String query;
   final String apiKey;
 
   const ActorSearchScreen(
       {Key? key,
+      required this.title,
       required this.actorSearchData,
       required this.query,
       required this.apiKey})
@@ -51,6 +53,7 @@ class _ActorSearchScreenState extends State<ActorSearchScreen> {
 
     Navigator.of(context).push(MaterialPageRoute(
         builder: (context) => ActorDetailScreen(
+              title: 'Flutter Movie App',
               actorDetails: actorDataMap,
               apiKey: widget.apiKey,
             )));
@@ -77,6 +80,16 @@ class _ActorSearchScreenState extends State<ActorSearchScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.title),
+        automaticallyImplyLeading: false,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context, true);
+          },
+        ),
+      ),
       backgroundColor: Color(0xFF101820),
       body: Center(
           child: ListView(

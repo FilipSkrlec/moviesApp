@@ -6,6 +6,7 @@ import 'package:movies_app/widgets/category_name.dart';
 import 'actor_detail_screen.dart';
 
 class MovieDetailsScreen extends StatefulWidget {
+  final String title;
   final Map<String, String> movieDetails;
   final Map<String, String> topActors;
   final Map<String, Map<String, String>> reviews;
@@ -14,6 +15,7 @@ class MovieDetailsScreen extends StatefulWidget {
 
   const MovieDetailsScreen(
       {Key? key,
+      required this.title,
       required this.movieDetails,
       required this.topActors,
       required this.reviews,
@@ -58,6 +60,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
 
     Navigator.of(context).push(MaterialPageRoute(
         builder: (context) => ActorDetailScreen(
+              title: 'Flutter Movie App',
               actorDetails: actorDataMap,
               apiKey: widget.apiKey,
             )));
@@ -109,6 +112,16 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.title),
+        automaticallyImplyLeading: false,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context, true);
+          },
+        ),
+      ),
       backgroundColor: Color(0xFF101820),
       body: Center(
           child: ListView(

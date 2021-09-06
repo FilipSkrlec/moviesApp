@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'movie_details_screen.dart';
 
 class MovieSearchScreen extends StatefulWidget {
+  final String title;
   final List<dynamic> movieSearchData;
   final String query;
   final String guestSessionId;
@@ -11,6 +12,7 @@ class MovieSearchScreen extends StatefulWidget {
 
   const MovieSearchScreen(
       {Key? key,
+      required this.title,
       required this.movieSearchData,
       required this.query,
       required this.guestSessionId,
@@ -93,6 +95,7 @@ class _MovieSearchScreenState extends State<MovieSearchScreen> {
 
     Navigator.of(context).push(MaterialPageRoute(
         builder: (context) => MovieDetailsScreen(
+              title: 'Flutter Movie App',
               movieDetails: movieDataMap,
               topActors: topActorsIds,
               reviews: reviews,
@@ -122,6 +125,16 @@ class _MovieSearchScreenState extends State<MovieSearchScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.title),
+        automaticallyImplyLeading: false,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context, true);
+          },
+        ),
+      ),
       backgroundColor: Color(0xFF101820),
       body: Center(
           child: ListView(
