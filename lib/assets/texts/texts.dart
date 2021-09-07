@@ -22,7 +22,7 @@ const Map<String, String> categoryMovieLabels = {
   "reviews": "REVIEWS:",
 };
 const String ratedMovieText = "YOU RATED MOVIE WITH ";
-const String ratingDropdownButtonText = "Rating:";
+const String ratingDropdownButtonText = "Rate:";
 const List<String> possibleMovieRatings = [
   '0.5',
   '1.0',

@@ -27,6 +27,25 @@ class MovieSearchScreen extends StatefulWidget {
 
 class _MovieSearchScreenState extends State<MovieSearchScreen> {
   int _page = 2;
+  ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+
+    _scrollController.addListener(() {
+      if (_scrollController.position.atEdge) {
+        if (_scrollController.position.pixels != 0) {
+          getNextMoviePage();
+        }
+      }
+    });
+  }
+
+  void scrollToTop() {
+    _scrollController.animateTo(0,
+        duration: Duration(seconds: 1), curve: Curves.linear);
+  }
 
   Future navigateToMovieDetailsScreen(BuildContext context, String id) async {
     var responseById = await http.get(Uri.https('api.themoviedb.org',
@@ -140,6 +159,7 @@ class _MovieSearchScreenState extends State<MovieSearchScreen> {
       backgroundColor: blackBackground,
       body: Center(
           child: ListView.builder(
+              controller: _scrollController,
               itemBuilder: (context, index) {
                 return Container(
                   padding: EdgeInsets.fromLTRB(20, 20, 20, 20),
@@ -155,9 +175,9 @@ class _MovieSearchScreenState extends State<MovieSearchScreen> {
               itemCount: widget.movieSearchData.length)),
       floatingActionButton: FloatingActionButton(
         backgroundColor: yellowDetail,
-        onPressed: getNextMoviePage,
-        tooltip: 'Get more movies',
-        child: Icon(Icons.add),
+        onPressed: scrollToTop,
+        tooltip: 'Go to top',
+        child: Icon(Icons.arrow_upward_sharp),
       ),
     );
   }

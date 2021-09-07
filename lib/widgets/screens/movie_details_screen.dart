@@ -30,6 +30,13 @@ class MovieDetailsScreen extends StatefulWidget {
 }
 
 class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
+  ScrollController _scrollController = ScrollController();
+
+  void scrollToTop() {
+    _scrollController.animateTo(0,
+        duration: Duration(seconds: 1), curve: Curves.linear);
+  }
+
   String selectedRating = "1.0";
   bool isRated = false;
 
@@ -127,6 +134,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
       backgroundColor: blackBackground,
       body: Center(
           child: ListView(
+        controller: _scrollController,
         padding: EdgeInsets.fromLTRB(20, 20, 20, 20),
         children: <Widget>[
           Center(
@@ -273,6 +281,12 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                   .toList()),
         ],
       )),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: yellowDetail,
+        onPressed: scrollToTop,
+        tooltip: 'Go to top',
+        child: Icon(Icons.arrow_upward_sharp),
+      ),
     );
   }
 }

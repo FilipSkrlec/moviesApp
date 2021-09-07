@@ -28,6 +28,27 @@ class _HomePageScreenState extends State<HomePageScreen> {
   int _page = 1;
 
   String guestSessionId = "";
+  ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+
+    getMoviesData();
+
+    _scrollController.addListener(() {
+      if (_scrollController.position.atEdge) {
+        if (_scrollController.position.pixels != 0) {
+          getMoviesData();
+        }
+      }
+    });
+  }
+
+  void scrollToTop() {
+    _scrollController.animateTo(0,
+        duration: Duration(seconds: 1), curve: Curves.linear);
+  }
 
   Future getMoviesData() async {
     if (guestSessionId == "") {
@@ -210,6 +231,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
       backgroundColor: blackBackground,
       body: Center(
           child: ListView(
+        controller: _scrollController,
         children: <Widget>[
           TextField(
               controller: this.movieSearchInputController,
@@ -264,9 +286,9 @@ class _HomePageScreenState extends State<HomePageScreen> {
       )),
       floatingActionButton: FloatingActionButton(
         backgroundColor: yellowDetail,
-        onPressed: getMoviesData,
-        tooltip: 'Get more movies',
-        child: Icon(Icons.add),
+        onPressed: scrollToTop,
+        tooltip: 'Go to top',
+        child: Icon(Icons.arrow_upward_sharp),
       ),
     );
   }

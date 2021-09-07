@@ -25,6 +25,25 @@ class ActorSearchScreen extends StatefulWidget {
 
 class _ActorSearchScreenState extends State<ActorSearchScreen> {
   int _page = 2;
+  ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+
+    _scrollController.addListener(() {
+      if (_scrollController.position.atEdge) {
+        if (_scrollController.position.pixels != 0) {
+          getNextActorPage();
+        }
+      }
+    });
+  }
+
+  void scrollToTop() {
+    _scrollController.animateTo(0,
+        duration: Duration(seconds: 1), curve: Curves.linear);
+  }
 
   Future navigateToActorDetailScreen(BuildContext context, String id) async {
     var responseById = await http.get(Uri.https('api.themoviedb.org',
@@ -95,6 +114,7 @@ class _ActorSearchScreenState extends State<ActorSearchScreen> {
       backgroundColor: blackBackground,
       body: Center(
           child: ListView.builder(
+              controller: _scrollController,
               itemBuilder: (context, index) {
                 return Container(
                   padding: EdgeInsets.fromLTRB(20, 20, 20, 20),
@@ -110,9 +130,9 @@ class _ActorSearchScreenState extends State<ActorSearchScreen> {
               itemCount: widget.actorSearchData.length)),
       floatingActionButton: FloatingActionButton(
         backgroundColor: yellowDetail,
-        onPressed: getNextActorPage,
-        tooltip: 'Get more movies',
-        child: Icon(Icons.add),
+        onPressed: scrollToTop,
+        tooltip: 'Go to top',
+        child: Icon(Icons.arrow_upward_sharp),
       ),
     );
   }

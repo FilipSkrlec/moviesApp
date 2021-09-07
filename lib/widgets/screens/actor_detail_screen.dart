@@ -21,6 +21,13 @@ class ActorDetailScreen extends StatefulWidget {
 }
 
 class _ActorDetailScreenState extends State<ActorDetailScreen> {
+  ScrollController _scrollController = ScrollController();
+
+  void scrollToTop() {
+    _scrollController.animateTo(0,
+        duration: Duration(seconds: 1), curve: Curves.linear);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -36,6 +43,7 @@ class _ActorDetailScreenState extends State<ActorDetailScreen> {
       ),
       backgroundColor: blackBackground,
       body: ListView(
+        controller: _scrollController,
         padding: EdgeInsets.fromLTRB(20, 20, 20, 20),
         children: <Widget>[
           Center(
@@ -71,6 +79,12 @@ class _ActorDetailScreenState extends State<ActorDetailScreen> {
                     style: TextStyle(color: yellowDetail, fontSize: 20),
                   ))),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: yellowDetail,
+        onPressed: scrollToTop,
+        tooltip: 'Go to top',
+        child: Icon(Icons.arrow_upward_sharp),
       ),
     );
   }
