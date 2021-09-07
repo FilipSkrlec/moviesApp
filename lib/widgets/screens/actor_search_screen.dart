@@ -94,28 +94,20 @@ class _ActorSearchScreenState extends State<ActorSearchScreen> {
       ),
       backgroundColor: blackBackground,
       body: Center(
-          child: ListView(
-        children: <Widget>[
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Column(
-                  children: widget.actorSearchData
-                      .map((item) => new Container(
-                            padding: EdgeInsets.fromLTRB(20, 20, 20, 20),
-                            child: TextButton(
-                                onPressed: () => navigateToActorDetailScreen(
-                                    context, item["id"].toString()),
-                                child: Text(
-                                  item["name"] ?? "",
-                                  style: TextStyle(fontSize: 20),
-                                )),
-                          ))
-                      .toList())
-            ],
-          ),
-        ],
-      )),
+          child: ListView.builder(
+              itemBuilder: (context, index) {
+                return Container(
+                  padding: EdgeInsets.fromLTRB(20, 20, 20, 20),
+                  child: TextButton(
+                      onPressed: () => navigateToActorDetailScreen(context,
+                          widget.actorSearchData[index]["id"].toString()),
+                      child: Text(
+                        widget.actorSearchData[index]["name"] ?? noDataText,
+                        style: TextStyle(fontSize: 20),
+                      )),
+                );
+              },
+              itemCount: widget.actorSearchData.length)),
       floatingActionButton: FloatingActionButton(
         backgroundColor: yellowDetail,
         onPressed: getNextActorPage,

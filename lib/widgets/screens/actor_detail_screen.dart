@@ -35,14 +35,11 @@ class _ActorDetailScreenState extends State<ActorDetailScreen> {
         ),
       ),
       backgroundColor: blackBackground,
-      body: Center(
-          child: ListView(
+      body: ListView(
         padding: EdgeInsets.fromLTRB(20, 20, 20, 20),
         children: <Widget>[
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Container(
+          Center(
+              child: Container(
                   padding: EdgeInsets.fromLTRB(20, 20, 20, 20),
                   decoration: BoxDecoration(
                       border: Border.all(width: 3, color: yellowDetail),
@@ -52,34 +49,29 @@ class _ActorDetailScreenState extends State<ActorDetailScreen> {
                   child: Text(
                     widget.actorDetails["name"] ?? "",
                     style: TextStyle(color: yellowDetail, fontSize: 30),
-                  )),
-              CategoryNameWidget(
-                  categoryName: categoryActorLabels["birthday"]!),
-              CategoryDataWidget(
-                  categoryData:
-                      widget.actorDetails["birthday"] ?? unknownDataText),
-              CategoryNameWidget(
-                  categoryName: categoryActorLabels["place_of_birth"]!),
-              CategoryDataWidget(
-                  categoryData:
-                      widget.actorDetails["place_of_birth"] ?? unknownDataText),
-              CategoryNameWidget(
-                  categoryName: categoryActorLabels["biography"]!),
-              CategoryDataWidget(
-                  categoryData:
-                      widget.actorDetails["biography"] ?? unknownDataText),
-              CategoryNameWidget(
-                  categoryName: categoryActorLabels["top_movies"]!),
-              Container(
+                  ))),
+          CategoryNameWidget(categoryName: categoryActorLabels["birthday"]!),
+          CategoryDataWidget(
+              categoryData: widget.actorDetails["birthday"] ?? unknownDataText),
+          CategoryNameWidget(
+              categoryName: categoryActorLabels["place_of_birth"]!),
+          CategoryDataWidget(
+              categoryData:
+                  widget.actorDetails["place_of_birth"] ?? unknownDataText),
+          CategoryNameWidget(categoryName: categoryActorLabels["biography"]!),
+          CategoryDataWidget(
+              categoryData:
+                  widget.actorDetails["biography"] ?? unknownDataText),
+          CategoryNameWidget(categoryName: categoryActorLabels["top_movies"]!),
+          Center(
+              child: Container(
                   padding: EdgeInsets.fromLTRB(10, 20, 10, 20),
                   child: Text(
                     widget.actorDetails["top_movies"] ?? unknownDataText,
                     style: TextStyle(color: yellowDetail, fontSize: 20),
-                  )),
-            ],
-          )
+                  ))),
         ],
-      )),
+      ),
     );
   }
 }

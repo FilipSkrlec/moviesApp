@@ -139,28 +139,20 @@ class _MovieSearchScreenState extends State<MovieSearchScreen> {
       ),
       backgroundColor: blackBackground,
       body: Center(
-          child: ListView(
-        children: <Widget>[
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Column(
-                  children: widget.movieSearchData
-                      .map((item) => new Container(
-                            padding: EdgeInsets.fromLTRB(20, 20, 20, 20),
-                            child: TextButton(
-                                onPressed: () => navigateToMovieDetailsScreen(
-                                    context, item["id"].toString()),
-                                child: Text(
-                                  item["title"] ?? "",
-                                  style: TextStyle(fontSize: 20),
-                                )),
-                          ))
-                      .toList())
-            ],
-          ),
-        ],
-      )),
+          child: ListView.builder(
+              itemBuilder: (context, index) {
+                return Container(
+                  padding: EdgeInsets.fromLTRB(20, 20, 20, 20),
+                  child: TextButton(
+                      onPressed: () => navigateToMovieDetailsScreen(context,
+                          widget.movieSearchData[index]["id"].toString()),
+                      child: Text(
+                        widget.movieSearchData[index]["title"] ?? noDataText,
+                        style: TextStyle(fontSize: 20),
+                      )),
+                );
+              },
+              itemCount: widget.movieSearchData.length)),
       floatingActionButton: FloatingActionButton(
         backgroundColor: yellowDetail,
         onPressed: getNextMoviePage,

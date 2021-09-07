@@ -13,11 +13,12 @@ class CategoryDataWidget extends StatefulWidget {
 class _CategoryDataWidgetState extends State<CategoryDataWidget> {
   @override
   Widget build(BuildContext context) {
-    return Container(
-        padding: EdgeInsets.fromLTRB(10, 20, 10, 20),
-        child: Text(
-          widget.categoryData,
-          style: TextStyle(color: Color(0xFFFEE715), fontSize: 20),
-        ));
+    return Center(
+        child: Container(
+            padding: EdgeInsets.fromLTRB(10, 20, 10, 20),
+            child: Text(
+              widget.categoryData,
+              style: TextStyle(color: Color(0xFFFEE715), fontSize: 20),
+            )));
   }
 }

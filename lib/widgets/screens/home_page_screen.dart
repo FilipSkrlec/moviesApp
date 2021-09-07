@@ -233,38 +233,33 @@ class _HomePageScreenState extends State<HomePageScreen> {
                     onPressed: () => navigateToActorSearchScreen(
                         context, this.actorSearchInputController.text)),
               )),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              this.movieTitlesIds != {}
-                  ? Column(
-                      children: this
-                          .movieTitlesIds
-                          .keys
-                          .map((item) => new Container(
-                                margin:
-                                    const EdgeInsets.fromLTRB(20, 20, 20, 20),
-                                decoration: BoxDecoration(
-                                    border: Border.all(
-                                        width: 3, color: yellowDetail),
-                                    borderRadius: BorderRadius.only(
-                                        topLeft: Radius.circular(25.0),
-                                        bottomRight: Radius.circular(25.0))),
-                                padding: EdgeInsets.fromLTRB(20, 20, 20, 20),
-                                child: TextButton(
-                                    onPressed: () =>
-                                        navigateToMovieDetailsScreen(
-                                            context, item),
-                                    child: Text(
-                                        this.movieTitlesIds[item] ?? noDataText,
-                                        style: TextStyle(
-                                            fontSize: 21,
-                                            color: yellowDetail))),
-                              ))
-                          .toList())
-                  : Text("Nema podataka")
-            ],
-          ),
+          ListView.builder(
+              shrinkWrap: true,
+              physics: ClampingScrollPhysics(),
+              itemCount: this.movieTitlesIds.keys.length,
+              itemBuilder: (context, index) {
+                return Center(
+                    child: this.movieTitlesIds != {}
+                        ? Container(
+                            margin: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+                            decoration: BoxDecoration(
+                                border:
+                                    Border.all(width: 3, color: yellowDetail),
+                                borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(25.0),
+                                    bottomRight: Radius.circular(25.0))),
+                            padding: EdgeInsets.fromLTRB(20, 20, 20, 20),
+                            child: TextButton(
+                                onPressed: () => navigateToMovieDetailsScreen(
+                                    context,
+                                    this.movieTitlesIds.keys.toList()[index]),
+                                child: Text(
+                                    this.movieTitlesIds.values.toList()[index],
+                                    style: TextStyle(
+                                        fontSize: 21, color: yellowDetail))),
+                          )
+                        : Text("Nema podataka"));
+              })
         ],
       )),
       floatingActionButton: FloatingActionButton(
