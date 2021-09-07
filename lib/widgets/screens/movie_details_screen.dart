@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:movies_app/assets/colors/colors.dart';
@@ -10,7 +11,7 @@ import 'actor_detail_screen.dart';
 class MovieDetailsScreen extends StatefulWidget {
   final String title;
   final Map<String, String> movieDetails;
-  final Map<String, String> topActors;
+  final Map<String, Map<String, String>> topActorsDetails;
   final Map<String, Map<String, String>> reviews;
   final String guestSessionId;
   final String apiKey;
@@ -19,7 +20,7 @@ class MovieDetailsScreen extends StatefulWidget {
       {Key? key,
       required this.title,
       required this.movieDetails,
-      required this.topActors,
+      required this.topActorsDetails,
       required this.reviews,
       required this.guestSessionId,
       required this.apiKey})
@@ -140,15 +141,19 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
           Center(
               child: Container(
                   padding: EdgeInsets.fromLTRB(20, 20, 20, 20),
+                  margin: EdgeInsets.fromLTRB(10, 20, 10, 20),
                   decoration: BoxDecoration(
                       border: Border.all(width: 3, color: yellowDetail),
-                      borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(25.0),
-                          bottomRight: Radius.circular(25.0))),
+                      borderRadius: BorderRadius.all(Radius.circular(25.0))),
                   child: Text(
                     widget.movieDetails["title"] ?? noDataText,
                     style: TextStyle(color: yellowDetail, fontSize: 30),
                   ))),
+          CachedNetworkImage(
+            placeholder: (context, url) => CircularProgressIndicator(),
+            imageUrl: "https://image.tmdb.org/t/p/w500" +
+                widget.movieDetails["backdrop_path"]!,
+          ),
           CategoryNameWidget(categoryName: categoryMovieLabels["rating"]!),
           this.isRated
               ? Center(
@@ -236,19 +241,37 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
           CategoryDataWidget(
               categoryData: widget.movieDetails["overview"] ?? noDataText),
           CategoryNameWidget(categoryName: categoryMovieLabels["main_actors"]!),
-          Column(
-              children: widget.topActors.keys
-                  .map((item) => new Container(
-                      padding: EdgeInsets.fromLTRB(20, 20, 20, 20),
-                      child: TextButton(
-                        onPressed: () =>
-                            navigateToActorDetailScreen(context, item),
-                        child: Text(
-                          widget.topActors[item] ?? noDataText,
-                          style: TextStyle(color: linkBlue, fontSize: 20),
-                        ),
-                      )))
-                  .toList()),
+          ListView.builder(
+              shrinkWrap: true,
+              physics: ClampingScrollPhysics(),
+              itemCount: widget.topActorsDetails.keys.length,
+              itemBuilder: (context, index) {
+                return Center(
+                    child: Column(
+                  children: <Widget>[
+                    TextButton(
+                      onPressed: () => navigateToActorDetailScreen(context,
+                          widget.topActorsDetails.keys.toList()[index]),
+                      child: Text(
+                        widget.topActorsDetails[widget.topActorsDetails.keys
+                                .toList()[index]]!["name"]! +
+                            " (" +
+                            widget.topActorsDetails[widget.topActorsDetails.keys
+                                .toList()[index]]!["character"]! +
+                            ")",
+                        style: TextStyle(color: linkBlue, fontSize: 20),
+                      ),
+                    ),
+                    CachedNetworkImage(
+                      placeholder: (context, url) =>
+                          CircularProgressIndicator(),
+                      imageUrl: "https://image.tmdb.org/t/p/w500" +
+                          widget.topActorsDetails[widget.topActorsDetails.keys
+                              .toList()[index]]!["profile_path"]!,
+                    ),
+                  ],
+                ));
+              }),
           CategoryNameWidget(categoryName: categoryMovieLabels["reviews"]!),
           Column(
               children: widget.reviews.values

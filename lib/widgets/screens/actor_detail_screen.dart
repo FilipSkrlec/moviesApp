@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:movies_app/assets/colors/colors.dart';
 import 'package:movies_app/assets/texts/texts.dart';
@@ -49,15 +50,19 @@ class _ActorDetailScreenState extends State<ActorDetailScreen> {
           Center(
               child: Container(
                   padding: EdgeInsets.fromLTRB(20, 20, 20, 20),
+                  margin: EdgeInsets.fromLTRB(10, 20, 10, 20),
                   decoration: BoxDecoration(
                       border: Border.all(width: 3, color: yellowDetail),
-                      borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(25.0),
-                          bottomRight: Radius.circular(25.0))),
+                      borderRadius: BorderRadius.all(Radius.circular(25.0))),
                   child: Text(
                     widget.actorDetails["name"] ?? "",
                     style: TextStyle(color: yellowDetail, fontSize: 30),
                   ))),
+          CachedNetworkImage(
+            placeholder: (context, url) => CircularProgressIndicator(),
+            imageUrl: "https://image.tmdb.org/t/p/w500" +
+                widget.actorDetails["profile_path"]!,
+          ),
           CategoryNameWidget(categoryName: categoryActorLabels["birthday"]!),
           CategoryDataWidget(
               categoryData: widget.actorDetails["birthday"] ?? unknownDataText),

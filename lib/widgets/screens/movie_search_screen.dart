@@ -88,11 +88,15 @@ class _MovieSearchScreenState extends State<MovieSearchScreen> {
         {"api_key": widget.apiKey, "language": "en-US"}));
 
     var jsonCreditsData = jsonDecode(responseCredits.body)["cast"];
-    Map<String, String> topActorsIds = {};
+
+    Map<String, Map<String, String>> topActorsDetails = {};
 
     for (int i = 0; i < 5; i++) {
-      topActorsIds[jsonCreditsData[i]["id"].toString()] =
-          jsonCreditsData[i]["name"];
+      Map<String, String> actorDetails = {};
+      actorDetails["name"] = jsonCreditsData[i]["name"];
+      actorDetails["profile_path"] = jsonCreditsData[i]["profile_path"];
+      actorDetails["character"] = jsonCreditsData[i]["character"];
+      topActorsDetails[jsonCreditsData[i]["id"].toString()] = actorDetails;
     }
 
     var responseMovieReviews = await http.get(Uri.https(
@@ -118,7 +122,7 @@ class _MovieSearchScreenState extends State<MovieSearchScreen> {
         builder: (context) => MovieDetailsScreen(
               title: appTitle,
               movieDetails: movieDataMap,
-              topActors: topActorsIds,
+              topActorsDetails: topActorsDetails,
               reviews: reviews,
               guestSessionId: widget.guestSessionId,
               apiKey: widget.apiKey,

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:movies_app/assets/colors/colors.dart';
@@ -25,6 +26,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
 
   var jsonData;
   Map<String, String> movieTitlesIds = {};
+  Map<String, String> movieImages = {};
   int _page = 1;
 
   String guestSessionId = "";
@@ -34,6 +36,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
   void initState() {
     super.initState();
 
+    loadSavedData();
     getMoviesData();
 
     _scrollController.addListener(() {
@@ -80,6 +83,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
       setState(() {
         for (var movie in jsonData["results"]) {
           this.movieTitlesIds[movie["id"].toString()] = movie["title"];
+          this.movieImages[movie["id"].toString()] = movie["backdrop_path"];
         }
 
         _page++;
@@ -129,11 +133,15 @@ class _HomePageScreenState extends State<HomePageScreen> {
         {"api_key": widget.apiKey, "language": "en-US"}));
 
     var jsonCreditsData = jsonDecode(responseCredits.body)["cast"];
-    Map<String, String> topActorsIds = {};
+
+    Map<String, Map<String, String>> topActorsDetails = {};
 
     for (int i = 0; i < 5; i++) {
-      topActorsIds[jsonCreditsData[i]["id"].toString()] =
-          jsonCreditsData[i]["name"];
+      Map<String, String> actorDetails = {};
+      actorDetails["name"] = jsonCreditsData[i]["name"];
+      actorDetails["profile_path"] = jsonCreditsData[i]["profile_path"];
+      actorDetails["character"] = jsonCreditsData[i]["character"];
+      topActorsDetails[jsonCreditsData[i]["id"].toString()] = actorDetails;
     }
 
     var responseMovieReviews = await http.get(Uri.https(
@@ -159,7 +167,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
         builder: (context) => MovieDetailsScreen(
               title: appTitle,
               movieDetails: movieDataMap,
-              topActors: topActorsIds,
+              topActorsDetails: topActorsDetails,
               reviews: reviews,
               guestSessionId: this.guestSessionId,
               apiKey: widget.apiKey,
@@ -223,7 +231,6 @@ class _HomePageScreenState extends State<HomePageScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (_page == 1) loadSavedData();
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
@@ -261,15 +268,16 @@ class _HomePageScreenState extends State<HomePageScreen> {
               itemCount: this.movieTitlesIds.keys.length,
               itemBuilder: (context, index) {
                 return Center(
-                    child: this.movieTitlesIds != {}
+                    child: Column(
+                  children: <Widget>[
+                    this.movieTitlesIds != {}
                         ? Container(
                             margin: const EdgeInsets.fromLTRB(20, 20, 20, 20),
                             decoration: BoxDecoration(
                                 border:
                                     Border.all(width: 3, color: yellowDetail),
-                                borderRadius: BorderRadius.only(
-                                    topLeft: Radius.circular(25.0),
-                                    bottomRight: Radius.circular(25.0))),
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(25.0))),
                             padding: EdgeInsets.fromLTRB(20, 20, 20, 20),
                             child: TextButton(
                                 onPressed: () => navigateToMovieDetailsScreen(
@@ -280,7 +288,17 @@ class _HomePageScreenState extends State<HomePageScreen> {
                                     style: TextStyle(
                                         fontSize: 21, color: yellowDetail))),
                           )
-                        : Text("Nema podataka"));
+                        : Text(noDataText),
+                    this.movieImages != {}
+                        ? CachedNetworkImage(
+                            placeholder: (context, url) =>
+                                CircularProgressIndicator(),
+                            imageUrl: "https://image.tmdb.org/t/p/w500" +
+                                this.movieImages.values.toList()[index],
+                          )
+                        : Text(noDataText),
+                  ],
+                ));
               })
         ],
       )),
