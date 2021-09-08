@@ -37,7 +37,6 @@ class _HomePageScreenState extends State<HomePageScreen> {
     super.initState();
 
     loadSavedData();
-    getMoviesData();
 
     _scrollController.addListener(() {
       if (_scrollController.position.atEdge) {
@@ -76,7 +75,8 @@ class _HomePageScreenState extends State<HomePageScreen> {
         SharedPreferences prefs = await SharedPreferences.getInstance();
 
         for (var movie in jsonData["results"]) {
-          prefs.setString(movie["id"].toString(), movie["title"]);
+          prefs.setString(movie["id"].toString(),
+              movie["title"] + "|###|" + movie["backdrop_path"]);
         }
       }
 
@@ -220,7 +220,8 @@ class _HomePageScreenState extends State<HomePageScreen> {
 
     setState(() {
       for (String key in movieKeys) {
-        this.movieTitlesIds[key] = prefs.get(key).toString();
+        this.movieTitlesIds[key] = prefs.get(key).toString().split("|###|")[0];
+        this.movieImages[key] = prefs.get(key).toString().split("|###|")[1];
       }
     });
 
@@ -270,33 +271,27 @@ class _HomePageScreenState extends State<HomePageScreen> {
                 return Center(
                     child: Column(
                   children: <Widget>[
-                    this.movieTitlesIds != {}
-                        ? Container(
-                            margin: const EdgeInsets.fromLTRB(20, 20, 20, 20),
-                            decoration: BoxDecoration(
-                                border:
-                                    Border.all(width: 3, color: yellowDetail),
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(25.0))),
-                            padding: EdgeInsets.fromLTRB(20, 20, 20, 20),
-                            child: TextButton(
-                                onPressed: () => navigateToMovieDetailsScreen(
-                                    context,
-                                    this.movieTitlesIds.keys.toList()[index]),
-                                child: Text(
-                                    this.movieTitlesIds.values.toList()[index],
-                                    style: TextStyle(
-                                        fontSize: 21, color: yellowDetail))),
-                          )
-                        : Text(noDataText),
-                    this.movieImages != {}
-                        ? CachedNetworkImage(
-                            placeholder: (context, url) =>
-                                CircularProgressIndicator(),
-                            imageUrl: "https://image.tmdb.org/t/p/w500" +
-                                this.movieImages.values.toList()[index],
-                          )
-                        : Text(noDataText),
+                    Container(
+                      margin: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+                      decoration: BoxDecoration(
+                          border: Border.all(width: 3, color: yellowDetail),
+                          borderRadius:
+                              BorderRadius.all(Radius.circular(25.0))),
+                      padding: EdgeInsets.fromLTRB(20, 20, 20, 20),
+                      child: TextButton(
+                          onPressed: () => navigateToMovieDetailsScreen(context,
+                              this.movieTitlesIds.keys.toList()[index]),
+                          child: Text(
+                              this.movieTitlesIds.values.toList()[index],
+                              style: TextStyle(
+                                  fontSize: 21, color: yellowDetail))),
+                    ),
+                    CachedNetworkImage(
+                      placeholder: (context, url) =>
+                          CircularProgressIndicator(),
+                      imageUrl: "https://image.tmdb.org/t/p/w500" +
+                          this.movieImages.values.toList()[index],
+                    ),
                   ],
                 ));
               })
