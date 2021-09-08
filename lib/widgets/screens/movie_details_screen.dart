@@ -307,7 +307,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
       floatingActionButton: FloatingActionButton(
         backgroundColor: yellowDetail,
         onPressed: scrollToTop,
-        tooltip: 'Go to top',
+        tooltip: scrollTopTooltip,
         child: Icon(Icons.arrow_upward_sharp),
       ),
     );

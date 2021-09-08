@@ -131,7 +131,7 @@ class _ActorSearchScreenState extends State<ActorSearchScreen> {
       floatingActionButton: FloatingActionButton(
         backgroundColor: yellowDetail,
         onPressed: scrollToTop,
-        tooltip: 'Go to top',
+        tooltip: scrollTopTooltip,
         child: Icon(Icons.arrow_upward_sharp),
       ),
     );

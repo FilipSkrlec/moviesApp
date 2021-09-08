@@ -3,6 +3,7 @@ const String searchMovieBarText = "Find movie:";
 const String searchActorBarText = "Find actor:";
 const String unknownDataText = "unknown";
 const String noDataText = "-";
+const String scrollTopTooltip = "Go to top";
 const Map<String, String> categoryActorLabels = {
   "birthday": "DATE OF BIRTH:",
   "place_of_birth": "PLACE OF BIRTH:",
