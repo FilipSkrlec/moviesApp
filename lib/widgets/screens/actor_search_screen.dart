@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:movies_app/assets/colors/colors.dart';
@@ -46,56 +48,103 @@ class _ActorSearchScreenState extends State<ActorSearchScreen> {
   }
 
   Future navigateToActorDetailScreen(BuildContext context, String id) async {
-    var responseById = await http.get(Uri.https('api.themoviedb.org',
-        '3/person/$id', {"api_key": widget.apiKey, "language": "en-US"}));
-    var jsonActorData = jsonDecode(responseById.body);
+    try {
+      var responseById = await http
+          .get(Uri.https('api.themoviedb.org', '3/person/$id',
+              {"api_key": widget.apiKey, "language": "en-US"}))
+          .timeout(Duration(seconds: 5));
+      var jsonActorData = jsonDecode(responseById.body);
 
-    Map<String, String> actorDataMap = {};
+      Map<String, String> actorDataMap = {};
 
-    for (var detail in Map.from(jsonActorData).keys) {
-      actorDataMap[detail] = jsonActorData[detail].toString();
+      for (var detail in Map.from(jsonActorData).keys) {
+        actorDataMap[detail] = jsonActorData[detail].toString();
+      }
+
+      var responseTopMovies = await http
+          .get(Uri.https('api.themoviedb.org', '3/person/$id/movie_credits',
+              {"api_key": widget.apiKey, "language": "en-US"}))
+          .timeout(Duration(seconds: 5));
+
+      var jsonTopMoviesData = jsonDecode(responseTopMovies.body)["cast"];
+
+      String topMovies = "";
+
+      for (int i = 0; i < 5; i++) {
+        topMovies += jsonTopMoviesData[i]["title"];
+        topMovies += "\n";
+      }
+
+      actorDataMap["top_movies"] = topMovies;
+
+      Navigator.of(context).push(MaterialPageRoute(
+          builder: (context) => ActorDetailScreen(
+                title: appTitle,
+                actorDetails: actorDataMap,
+                apiKey: widget.apiKey,
+              )));
+    } on TimeoutException catch (_) {
+      _showNoConnectionDialog();
+    } on SocketException catch (_) {
+      _showNoConnectionDialog();
+    } on Error catch (_) {
+      _showNoConnectionDialog();
     }
-
-    var responseTopMovies = await http.get(Uri.https(
-        'api.themoviedb.org',
-        '3/person/$id/movie_credits',
-        {"api_key": widget.apiKey, "language": "en-US"}));
-
-    var jsonTopMoviesData = jsonDecode(responseTopMovies.body)["cast"];
-
-    String topMovies = "";
-
-    for (int i = 0; i < 5; i++) {
-      topMovies += jsonTopMoviesData[i]["title"];
-      topMovies += "\n";
-    }
-
-    actorDataMap["top_movies"] = topMovies;
-
-    Navigator.of(context).push(MaterialPageRoute(
-        builder: (context) => ActorDetailScreen(
-              title: appTitle,
-              actorDetails: actorDataMap,
-              apiKey: widget.apiKey,
-            )));
   }
 
   Future getNextActorPage() async {
-    var responseByActorQuery =
-        await http.get(Uri.https('api.themoviedb.org', '3/search/person', {
-      "api_key": widget.apiKey,
-      "language": "en-US",
-      "query": widget.query,
-      "page": this._page.toString(),
-    }));
-    var jsonActorSearchData = jsonDecode(responseByActorQuery.body)["results"];
+    try {
+      var responseByActorQuery = await http
+          .get(Uri.https('api.themoviedb.org', '3/search/person', {
+            "api_key": widget.apiKey,
+            "language": "en-US",
+            "query": widget.query,
+            "page": this._page.toString(),
+          }))
+          .timeout(Duration(seconds: 5));
+      var jsonActorSearchData =
+          jsonDecode(responseByActorQuery.body)["results"];
 
-    setState(() {
-      for (var actor in jsonActorSearchData) {
-        widget.actorSearchData.add(actor);
-      }
-      _page++;
-    });
+      setState(() {
+        for (var actor in jsonActorSearchData) {
+          widget.actorSearchData.add(actor);
+        }
+        _page++;
+      });
+    } on TimeoutException catch (_) {
+      _showNoConnectionDialog();
+    } on SocketException catch (_) {
+      _showNoConnectionDialog();
+    } on Error catch (_) {
+      _showNoConnectionDialog();
+    }
+  }
+
+  Future<void> _showNoConnectionDialog() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text(noConnectionDialogTitle),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: const <Widget>[
+                Text(noConnectionDialogMessage),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text(noConnectionDialogButtonText),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override

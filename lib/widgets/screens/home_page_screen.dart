@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -37,6 +39,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
     super.initState();
 
     loadSavedData();
+    getMoviesData();
 
     _scrollController.addListener(() {
       if (_scrollController.position.atEdge) {
@@ -53,164 +56,234 @@ class _HomePageScreenState extends State<HomePageScreen> {
   }
 
   Future getMoviesData() async {
-    if (guestSessionId == "") {
-      var response = await http.get(Uri.https(
-          'api.themoviedb.org', '3/authentication/guest_session/new', {
-        "api_key": widget.apiKey,
-      }));
-      jsonData = jsonDecode(response.body);
-      guestSessionId = jsonData["guest_session_id"];
-    }
-    if (this._page <= 13) {
-      var response =
-          await http.get(Uri.https('api.themoviedb.org', '3/movie/top_rated', {
-        "api_key": widget.apiKey,
-        "language": "en-US",
-        "page": this._page.toString(),
-      }));
-      jsonData = jsonDecode(response.body);
-
-      if (this._page == 1) {
-        this.movieTitlesIds = {};
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-
-        for (var movie in jsonData["results"]) {
-          prefs.setString(movie["id"].toString(),
-              movie["title"] + "|###|" + movie["backdrop_path"]);
-        }
+    try {
+      if (guestSessionId == "") {
+        var response = await http
+            .get(Uri.https(
+                'api.themoviedb.org', '3/authentication/guest_session/new', {
+              "api_key": widget.apiKey,
+            }))
+            .timeout(Duration(seconds: 5));
+        jsonData = jsonDecode(response.body);
+        guestSessionId = jsonData["guest_session_id"];
       }
+      if (this._page <= 13) {
+        var response = await http
+            .get(Uri.https('api.themoviedb.org', '3/movie/top_rated', {
+              "api_key": widget.apiKey,
+              "language": "en-US",
+              "page": this._page.toString(),
+            }))
+            .timeout(Duration(seconds: 5));
+        jsonData = jsonDecode(response.body);
 
-      setState(() {
-        for (var movie in jsonData["results"]) {
-          this.movieTitlesIds[movie["id"].toString()] = movie["title"];
-          this.movieImages[movie["id"].toString()] = movie["backdrop_path"];
+        if (this._page == 1) {
+          this.movieTitlesIds = {};
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+
+          for (var movie in jsonData["results"]) {
+            prefs.setString(movie["id"].toString(),
+                movie["title"] + "|###|" + movie["backdrop_path"]);
+          }
         }
 
-        _page++;
-        jsonData = null;
-      });
+        setState(() {
+          for (var movie in jsonData["results"]) {
+            this.movieTitlesIds[movie["id"].toString()] = movie["title"];
+            this.movieImages[movie["id"].toString()] = movie["backdrop_path"];
+          }
+
+          _page++;
+          jsonData = null;
+        });
+      }
+    } on TimeoutException catch (_) {
+      _showNoConnectionDialog();
+    } on SocketException catch (_) {
+      _showNoConnectionDialog();
+    } on Error catch (_) {
+      _showNoConnectionDialog();
     }
+  }
+
+  Future<void> _showNoConnectionDialog() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text(noConnectionDialogTitle),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: const <Widget>[
+                Text(noConnectionDialogMessage),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text(noConnectionDialogButtonText),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Future navigateToMovieDetailsScreen(BuildContext context, String id) async {
-    var responseById = await http.get(Uri.https('api.themoviedb.org',
-        '3/movie/$id', {"api_key": widget.apiKey, "language": "en-US"}));
-    var jsonMovieData = jsonDecode(responseById.body);
+    try {
+      var responseById = await http
+          .get(Uri.https('api.themoviedb.org', '3/movie/$id',
+              {"api_key": widget.apiKey, "language": "en-US"}))
+          .timeout(Duration(seconds: 5));
+      var jsonMovieData = jsonDecode(responseById.body);
 
-    Map<String, String> movieDataMap = {};
+      Map<String, String> movieDataMap = {};
 
-    for (var detail in Map.from(jsonMovieData).keys) {
-      if (detail == "genres") {
-        List<String> movieGenres = [];
-        for (var genre in jsonMovieData[detail]) {
-          movieGenres.add(genre["name"]);
-        }
-        String finalString = "|";
-        for (var genre in movieGenres) {
-          finalString += genre;
-          finalString += "|";
-        }
-        movieDataMap[detail] = finalString;
-      } else if (detail == "production_companies") {
-        List<String> productionCompanies = [];
-        for (var company in jsonMovieData[detail]) {
-          productionCompanies.add(company["name"]);
-        }
-        String finalString = "";
-        for (var company in productionCompanies) {
-          finalString += company;
+      for (var detail in Map.from(jsonMovieData).keys) {
+        if (detail == "genres") {
+          List<String> movieGenres = [];
+          for (var genre in jsonMovieData[detail]) {
+            movieGenres.add(genre["name"]);
+          }
+          String finalString = "|";
+          for (var genre in movieGenres) {
+            finalString += genre;
+            finalString += "|";
+          }
           movieDataMap[detail] = finalString;
+        } else if (detail == "production_companies") {
+          List<String> productionCompanies = [];
+          for (var company in jsonMovieData[detail]) {
+            productionCompanies.add(company["name"]);
+          }
+          String finalString = "";
+          for (var company in productionCompanies) {
+            finalString += company;
+            movieDataMap[detail] = finalString;
+          }
+          movieDataMap[detail] = finalString;
+        } else {
+          movieDataMap[detail] = jsonMovieData[detail].toString();
         }
-        movieDataMap[detail] = finalString;
-      } else {
-        movieDataMap[detail] = jsonMovieData[detail].toString();
       }
+
+      var responseCredits = await http
+          .get(Uri.https('api.themoviedb.org', '3/movie/$id/credits',
+              {"api_key": widget.apiKey, "language": "en-US"}))
+          .timeout(Duration(seconds: 5));
+
+      var jsonCreditsData = jsonDecode(responseCredits.body)["cast"];
+
+      Map<String, Map<String, String>> topActorsDetails = {};
+
+      for (int i = 0; i < 5; i++) {
+        Map<String, String> actorDetails = {};
+        actorDetails["name"] = jsonCreditsData[i]["name"];
+        actorDetails["profile_path"] = jsonCreditsData[i]["profile_path"];
+        actorDetails["character"] = jsonCreditsData[i]["character"];
+        topActorsDetails[jsonCreditsData[i]["id"].toString()] = actorDetails;
+      }
+
+      var responseMovieReviews = await http
+          .get(Uri.https(
+            'api.themoviedb.org',
+            '3/movie/$id/reviews',
+            {"api_key": widget.apiKey, "language": "en-US"},
+          ))
+          .timeout(Duration(seconds: 5));
+
+      var jsonMovieReviews = jsonDecode(responseMovieReviews.body)["results"];
+
+      Map<String, Map<String, String>> reviews = {};
+
+      for (var review in jsonMovieReviews) {
+        Map<String, String> reviewData = {};
+        reviewData["author"] = review["author"];
+        reviewData["reviewer_rating"] =
+            review["author_details"]["rating"].toString();
+        reviewData["review_text"] = review["content"];
+        reviews[review["id"]] = reviewData;
+      }
+
+      Navigator.of(context).push(MaterialPageRoute(
+          builder: (context) => MovieDetailsScreen(
+                title: appTitle,
+                movieDetails: movieDataMap,
+                topActorsDetails: topActorsDetails,
+                reviews: reviews,
+                guestSessionId: this.guestSessionId,
+                apiKey: widget.apiKey,
+              )));
+    } on TimeoutException catch (_) {
+      _showNoConnectionDialog();
+    } on SocketException catch (_) {
+      _showNoConnectionDialog();
+    } on Error catch (_) {
+      _showNoConnectionDialog();
     }
-
-    var responseCredits = await http.get(Uri.https(
-        'api.themoviedb.org',
-        '3/movie/$id/credits',
-        {"api_key": widget.apiKey, "language": "en-US"}));
-
-    var jsonCreditsData = jsonDecode(responseCredits.body)["cast"];
-
-    Map<String, Map<String, String>> topActorsDetails = {};
-
-    for (int i = 0; i < 5; i++) {
-      Map<String, String> actorDetails = {};
-      actorDetails["name"] = jsonCreditsData[i]["name"];
-      actorDetails["profile_path"] = jsonCreditsData[i]["profile_path"];
-      actorDetails["character"] = jsonCreditsData[i]["character"];
-      topActorsDetails[jsonCreditsData[i]["id"].toString()] = actorDetails;
-    }
-
-    var responseMovieReviews = await http.get(Uri.https(
-      'api.themoviedb.org',
-      '3/movie/$id/reviews',
-      {"api_key": widget.apiKey, "language": "en-US"},
-    ));
-
-    var jsonMovieReviews = jsonDecode(responseMovieReviews.body)["results"];
-
-    Map<String, Map<String, String>> reviews = {};
-
-    for (var review in jsonMovieReviews) {
-      Map<String, String> reviewData = {};
-      reviewData["author"] = review["author"];
-      reviewData["reviewer_rating"] =
-          review["author_details"]["rating"].toString();
-      reviewData["review_text"] = review["content"];
-      reviews[review["id"]] = reviewData;
-    }
-
-    Navigator.of(context).push(MaterialPageRoute(
-        builder: (context) => MovieDetailsScreen(
-              title: appTitle,
-              movieDetails: movieDataMap,
-              topActorsDetails: topActorsDetails,
-              reviews: reviews,
-              guestSessionId: this.guestSessionId,
-              apiKey: widget.apiKey,
-            )));
   }
 
   Future navigateToMovieSearchScreen(BuildContext context, String query) async {
-    var responseByMovieQuery = await http.get(Uri.https(
-        'api.themoviedb.org', '3/search/movie', {
-      "api_key": widget.apiKey,
-      "language": "en-US",
-      "query": query,
-      "page": "1"
-    }));
-    var jsonMovieSearchData = jsonDecode(responseByMovieQuery.body)["results"];
+    try {
+      var responseByMovieQuery = await http
+          .get(Uri.https('api.themoviedb.org', '3/search/movie', {
+            "api_key": widget.apiKey,
+            "language": "en-US",
+            "query": query,
+            "page": "1"
+          }))
+          .timeout(Duration(seconds: 5));
+      var jsonMovieSearchData =
+          jsonDecode(responseByMovieQuery.body)["results"];
 
-    Navigator.of(context).push(MaterialPageRoute(
-        builder: (context) => MovieSearchScreen(
-              title: appTitle,
-              movieSearchData: jsonMovieSearchData,
-              query: query,
-              guestSessionId: this.guestSessionId,
-              apiKey: widget.apiKey,
-            )));
+      Navigator.of(context).push(MaterialPageRoute(
+          builder: (context) => MovieSearchScreen(
+                title: appTitle,
+                movieSearchData: jsonMovieSearchData,
+                query: query,
+                guestSessionId: this.guestSessionId,
+                apiKey: widget.apiKey,
+              )));
+    } on TimeoutException catch (_) {
+      _showNoConnectionDialog();
+    } on SocketException catch (_) {
+      _showNoConnectionDialog();
+    } on Error catch (_) {
+      _showNoConnectionDialog();
+    }
   }
 
   Future navigateToActorSearchScreen(BuildContext context, String query) async {
-    var responseByActorQuery = await http.get(Uri.https(
-        'api.themoviedb.org', '3/search/person', {
-      "api_key": widget.apiKey,
-      "language": "en-US",
-      "query": query,
-      "page": "1"
-    }));
-    var jsonActorSearchData = jsonDecode(responseByActorQuery.body)["results"];
+    try {
+      var responseByActorQuery = await http
+          .get(Uri.https('api.themoviedb.org', '3/search/person', {
+            "api_key": widget.apiKey,
+            "language": "en-US",
+            "query": query,
+            "page": "1"
+          }))
+          .timeout(Duration(seconds: 5));
+      var jsonActorSearchData =
+          jsonDecode(responseByActorQuery.body)["results"];
 
-    Navigator.of(context).push(MaterialPageRoute(
-        builder: (context) => ActorSearchScreen(
-              title: appTitle,
-              actorSearchData: jsonActorSearchData,
-              query: query,
-              apiKey: widget.apiKey,
-            )));
+      Navigator.of(context).push(MaterialPageRoute(
+          builder: (context) => ActorSearchScreen(
+                title: appTitle,
+                actorSearchData: jsonActorSearchData,
+                query: query,
+                apiKey: widget.apiKey,
+              )));
+    } on TimeoutException catch (_) {
+      _showNoConnectionDialog();
+    } on SocketException catch (_) {
+      _showNoConnectionDialog();
+    } on Error catch (_) {
+      _showNoConnectionDialog();
+    }
   }
 
   void loadSavedData() async {

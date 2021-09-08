@@ -48,3 +48,7 @@ const List<String> possibleMovieRatings = [
 ];
 const String deleteMovieButtonText = "DELETE";
 const String rateMovieButtonText = "RATE";
+const String noConnectionDialogTitle = "No connection";
+const String noConnectionDialogMessage =
+    "We could not retrieve data from server";
+const String noConnectionDialogButtonText = "OK";

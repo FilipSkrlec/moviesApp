@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -42,43 +44,87 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
   bool isRated = false;
 
   Future navigateToActorDetailScreen(BuildContext context, String id) async {
-    var responseById = await http.get(Uri.https('api.themoviedb.org',
-        '3/person/$id', {"api_key": widget.apiKey, "language": "en-US"}));
-    var jsonActorData = jsonDecode(responseById.body);
+    try {
+      var responseById = await http
+          .get(Uri.https('api.themoviedb.org', '3/person/$id',
+              {"api_key": widget.apiKey, "language": "en-US"}))
+          .timeout(Duration(seconds: 5));
+      var jsonActorData = jsonDecode(responseById.body);
 
-    Map<String, String> actorDataMap = {};
+      Map<String, String> actorDataMap = {};
 
-    for (var detail in Map.from(jsonActorData).keys) {
-      actorDataMap[detail] = jsonActorData[detail].toString();
+      for (var detail in Map.from(jsonActorData).keys) {
+        actorDataMap[detail] = jsonActorData[detail].toString();
+      }
+
+      var responseTopMovies = await http
+          .get(Uri.https('api.themoviedb.org', '3/person/$id/movie_credits',
+              {"api_key": widget.apiKey, "language": "en-US"}))
+          .timeout(Duration(seconds: 5));
+
+      var jsonTopMoviesData = jsonDecode(responseTopMovies.body)["cast"];
+
+      String topMovies = "";
+
+      for (int i = 0; i < 5; i++) {
+        topMovies += jsonTopMoviesData[i]["title"];
+        topMovies += "\n";
+      }
+
+      actorDataMap["top_movies"] = topMovies;
+
+      Navigator.of(context).push(MaterialPageRoute(
+          builder: (context) => ActorDetailScreen(
+                title: appTitle,
+                actorDetails: actorDataMap,
+                apiKey: widget.apiKey,
+              )));
+    } on TimeoutException catch (_) {
+      _showNoConnectionDialog();
+    } on SocketException catch (_) {
+      _showNoConnectionDialog();
+    } on Error catch (_) {
+      _showNoConnectionDialog();
     }
-
-    var responseTopMovies = await http.get(Uri.https(
-        'api.themoviedb.org',
-        '3/person/$id/movie_credits',
-        {"api_key": widget.apiKey, "language": "en-US"}));
-
-    var jsonTopMoviesData = jsonDecode(responseTopMovies.body)["cast"];
-
-    String topMovies = "";
-
-    for (int i = 0; i < 5; i++) {
-      topMovies += jsonTopMoviesData[i]["title"];
-      topMovies += "\n";
-    }
-
-    actorDataMap["top_movies"] = topMovies;
-
-    Navigator.of(context).push(MaterialPageRoute(
-        builder: (context) => ActorDetailScreen(
-              title: appTitle,
-              actorDetails: actorDataMap,
-              apiKey: widget.apiKey,
-            )));
   }
 
   Future rateMovie(BuildContext context, String id) async {
-    if (this.selectedRating != "") {
-      var responseByRateRequest = await http.post(
+    try {
+      if (this.selectedRating != "") {
+        var responseByRateRequest = await http
+            .post(
+              Uri.https('api.themoviedb.org', '3/movie/$id/rating', {
+                "api_key": widget.apiKey,
+                "guest_session_id": widget.guestSessionId
+              }),
+              headers: <String, String>{
+                'Content-Type': 'application/json; charset=UTF-8',
+              },
+              body: jsonEncode(<String, double>{
+                'value': double.parse(this.selectedRating),
+              }),
+            )
+            .timeout(Duration(seconds: 5));
+        var jsonResponseByRate = jsonDecode(responseByRateRequest.body);
+
+        setState(() {
+          if (jsonResponseByRate["success"] == true) {
+            this.isRated = true;
+          }
+        });
+      }
+    } on TimeoutException catch (_) {
+      _showNoConnectionDialog();
+    } on SocketException catch (_) {
+      _showNoConnectionDialog();
+    } on Error catch (_) {
+      _showNoConnectionDialog();
+    }
+  }
+
+  Future deleteMovieRating(BuildContext context, String id) async {
+    try {
+      var responseByDeleteRateRequest = await http.delete(
         Uri.https('api.themoviedb.org', '3/movie/$id/rating', {
           "api_key": widget.apiKey,
           "guest_session_id": widget.guestSessionId
@@ -86,37 +132,48 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
-        body: jsonEncode(<String, double>{
-          'value': double.parse(this.selectedRating),
-        }),
-      );
-      var jsonResponseByRate = jsonDecode(responseByRateRequest.body);
+      ).timeout(Duration(seconds: 5));
+      var jsonResponseByDelete = jsonDecode(responseByDeleteRateRequest.body);
 
       setState(() {
-        if (jsonResponseByRate["success"] == true) {
-          this.isRated = true;
+        if (jsonResponseByDelete["success"] == true) {
+          this.isRated = false;
         }
       });
+    } on TimeoutException catch (_) {
+      _showNoConnectionDialog();
+    } on SocketException catch (_) {
+      _showNoConnectionDialog();
+    } on Error catch (_) {
+      _showNoConnectionDialog();
     }
   }
 
-  Future deleteMovieRating(BuildContext context, String id) async {
-    var responseByDeleteRateRequest = await http.delete(
-      Uri.https('api.themoviedb.org', '3/movie/$id/rating', {
-        "api_key": widget.apiKey,
-        "guest_session_id": widget.guestSessionId
-      }),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
+  Future<void> _showNoConnectionDialog() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text(noConnectionDialogTitle),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: const <Widget>[
+                Text(noConnectionDialogMessage),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text(noConnectionDialogButtonText),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
       },
     );
-    var jsonResponseByDelete = jsonDecode(responseByDeleteRateRequest.body);
-
-    setState(() {
-      if (jsonResponseByDelete["success"] == true) {
-        this.isRated = false;
-      }
-    });
   }
 
   @override
