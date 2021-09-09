@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:movies_app/assets/colors/colors.dart';
 import 'package:movies_app/assets/texts/texts.dart';
+import 'package:movies_app/models/MovieImageName.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'actor_search_screen.dart';
 import 'movie_details_screen.dart';
@@ -27,9 +28,8 @@ class _HomePageScreenState extends State<HomePageScreen> {
   final actorSearchInputController = TextEditingController();
 
   var jsonData;
-  Map<String, String> movieTitlesIds = {};
-  Map<String, String> movieImages = {};
   int _page = 1;
+  List<MovieImageName> moviesList = [];
 
   String guestSessionId = "";
   ScrollController _scrollController = ScrollController();
@@ -78,19 +78,29 @@ class _HomePageScreenState extends State<HomePageScreen> {
         jsonData = jsonDecode(response.body);
 
         if (this._page == 1) {
-          this.movieTitlesIds = {};
+          if (jsonData["results"] != {}) {
+            this.moviesList = [];
+          }
+          int counter = 1;
           SharedPreferences prefs = await SharedPreferences.getInstance();
 
           for (var movie in jsonData["results"]) {
-            prefs.setString(movie["id"].toString(),
-                movie["title"] + "|###|" + movie["backdrop_path"]);
+            prefs.setString(
+                movie["id"].toString(),
+                movie["title"] +
+                    "|###|" +
+                    movie["backdrop_path"] +
+                    "|###|" +
+                    counter.toString());
+            counter++;
           }
         }
 
         setState(() {
           for (var movie in jsonData["results"]) {
-            this.movieTitlesIds[movie["id"].toString()] = movie["title"];
-            this.movieImages[movie["id"].toString()] = movie["backdrop_path"];
+            MovieImageName newMovie = MovieImageName(
+                movie["id"].toString(), movie["title"], movie["backdrop_path"]);
+            this.moviesList.add(newMovie);
           }
 
           _page++;
@@ -291,10 +301,15 @@ class _HomePageScreenState extends State<HomePageScreen> {
 
     final movieKeys = prefs.getKeys();
 
+    for (int i = 0; i < movieKeys.length; i++) {
+      moviesList.add(MovieImageName("", "", ""));
+    }
+
     setState(() {
       for (String key in movieKeys) {
-        this.movieTitlesIds[key] = prefs.get(key).toString().split("|###|")[0];
-        this.movieImages[key] = prefs.get(key).toString().split("|###|")[1];
+        moviesList[int.parse(prefs.get(key).toString().split("|###|")[2]) - 1] =
+            MovieImageName(key, prefs.get(key).toString().split("|###|")[0],
+                prefs.get(key).toString().split("|###|")[1]);
       }
     });
 
@@ -339,7 +354,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
           ListView.builder(
               shrinkWrap: true,
               physics: ClampingScrollPhysics(),
-              itemCount: this.movieTitlesIds.keys.length,
+              itemCount: this.moviesList.length,
               itemBuilder: (context, index) {
                 return Center(
                     child: Column(
@@ -352,10 +367,9 @@ class _HomePageScreenState extends State<HomePageScreen> {
                               BorderRadius.all(Radius.circular(25.0))),
                       padding: EdgeInsets.fromLTRB(20, 20, 20, 20),
                       child: TextButton(
-                          onPressed: () => navigateToMovieDetailsScreen(context,
-                              this.movieTitlesIds.keys.toList()[index]),
-                          child: Text(
-                              this.movieTitlesIds.values.toList()[index],
+                          onPressed: () => navigateToMovieDetailsScreen(
+                              context, this.moviesList[index].getId()),
+                          child: Text(this.moviesList[index].getName(),
                               style: TextStyle(
                                   fontSize: 21, color: yellowDetail))),
                     ),
@@ -363,7 +377,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
                       placeholder: (context, url) =>
                           CircularProgressIndicator(),
                       imageUrl: "https://image.tmdb.org/t/p/w500" +
-                          this.movieImages.values.toList()[index],
+                          this.moviesList[index].getBackdropPath(),
                     ),
                   ],
                 ));
